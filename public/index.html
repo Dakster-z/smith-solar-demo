@@ -1,0 +1,81 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Smith's Solar Sales Assistant — Demo</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial; margin:0; background:#f5f7fb; }
+    .app { max-width:720px; margin:24px auto; background:#fff; border-radius:8px; box-shadow:0 6px 24px rgba(0,0,0,0.08); padding:20px; }
+    .messages { height:420px; overflow:auto; border:1px solid #eee; padding:12px; border-radius:8px; background:#fcfdff; }
+    .msg { margin:10px 0; }
+    .assistant { color:#0b2545; }
+    .user { text-align:right; color:#065f46; }
+    .input { display:flex; margin-top:12px; gap:8px; }
+    input[type="text"]{ flex:1; padding:10px 12px; border-radius:6px; border:1px solid #ddd; }
+    button { padding:10px 14px; border-radius:6px; border:0; background:#2563eb; color:#fff; cursor:pointer; }
+    small.gray { color:#6b7280; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h2>Smith's Solar Sales Assistant — Demo</h2>
+    <div class="messages" id="messages"></div>
+    <div class="input">
+      <input id="input" type="text" placeholder="Type here (e.g., 'estimate')" />
+      <button id="send">Send</button>
+    </div>
+    <p><small class="gray">This is a demo — no data stored persistently. To start a new session, refresh the page.</small></p>
+  </div>
+
+  <script>
+    let sessionId = null;
+    const messagesEl = document.getElementById('messages');
+    const inputEl = document.getElementById('input');
+    const sendBtn = document.getElementById('send');
+
+    function appendMessage(text, who='assistant') {
+      const d = document.createElement('div');
+      d.className = 'msg ' + (who === 'assistant' ? 'assistant' : 'user');
+      d.innerHTML = `<div><strong>${who === 'assistant' ? 'Assistant' : 'You'}</strong></div><div>${text.replace(/\n/g,'<br>')}</div>`;
+      messagesEl.appendChild(d);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    async function startSession() {
+      const r = await fetch('/session');
+      const j = await r.json();
+      sessionId = j.sessionId;
+      appendMessage(j.message, 'assistant');
+    }
+
+    sendBtn.addEventListener('click', sendMessage);
+    inputEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendMessage(); });
+
+    async function sendMessage(){
+      const text = inputEl.value.trim();
+      if (!text) return;
+      appendMessage(text, 'user');
+      inputEl.value = '';
+      if (!sessionId) {
+        await startSession();
+      }
+      try {
+        const r = await fetch('/api/message', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId, message: text })
+        });
+        const j = await r.json();
+        if (j.reply) appendMessage(j.reply, 'assistant');
+        if (j.error) appendMessage('Error: ' + j.error, 'assistant');
+      } catch (err) {
+        appendMessage('Error contacting server: ' + err.message, 'assistant');
+      }
+    }
+
+    // start session automatically
+    startSession();
+  </script>
+</body>
+</html>

@@ -1,15 +1,13 @@
 {
-  "name": "nodejs",
+  "name": "smith-solar-demo",
   "version": "1.0.0",
-  "description": "",
+  "description": "Smith's Solar Sales Assistant demo with built-in calculator",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "@types/node": "^22.13.11"
+    "express": "^4.18.2",
+    "uuid": "^9.0.0"
   }
 }
