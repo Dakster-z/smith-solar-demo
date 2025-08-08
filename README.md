@@ -14,7 +14,7 @@ A Node.js + Express demo app that simulates a solar sales assistant for training
 
 ## Installation
 ```bash
-git clone https://github.com/Dakster-z/smith-solar-assistant-demo.git
-cd smith-solar-assistant-demo
+git clone https://github.com/Dakster-z/smith-solar-demo.git
+cd smith-solar-demo
 npm install
 npm start
